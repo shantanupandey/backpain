@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration PUBLIC "-//log4j/log4j Configuration//EN" "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+    
+   <appender name="allAppender" class="org.apache.log4j.RollingFileAppender">
+		<param name="file" value="${catalina.home}/logs/calba_All.log" />
+		<param name="MaxFileSize" value="1MB" />
+		<param name="MaxBackupIndex" value="2" />
+		<layout class="org.apache.log4j.PatternLayout">
+		<param name="ConversionPattern" value="%d{ISO8601} [%d{z}] - %-5p [%t]: [%C] %m%n" />
+		</layout>
+	</appender>
+ 
+    <!-- specify the logging level for loggers from other libraries -->
+    <logger name="org.mybatis">
+    	<level value="ERROR" />
+    </logger>
+
+    <logger name="org.springframework">
+    	 <level value="ERROR" />
+    </logger> 
+    <logger name="net.calba.backpain">
+    	 <level value="DEBUG" />
+    </logger>
+  
+   <!-- for all other loggers log only info and above log messages -->
+     <root>
+		<priority value="debug" />
+		<appender-ref ref="allAppender" />
+	</root>
+    
+</log4j:configuration> 

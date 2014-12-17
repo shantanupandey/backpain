@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd">
+
+	
+	
+    <bean id="baseMapper" class="org.mybatis.spring.mapper.MapperFactoryBean" abstract="true" lazy-init="true">
+      <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+    </bean>
+    
+    <bean id="emailMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.EmailMapper" />	  
+	</bean>
+	
+	<bean id="clientMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.ClientMapper" />	  
+	</bean>
+	
+	<bean id="addressMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.AddressMapper" />	  
+	</bean>
+	
+	<bean id="clientFormMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.ClientFormMapper" />	  
+	</bean>
+	
+	<bean id="clientStateMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.ClientStateMapper" />	  
+	</bean>
+	
+	<bean id="clientTypeMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.ClientTypeMapper" />	  
+	</bean>
+	
+	<bean id="formMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.FormMapper" />	  
+	</bean>
+	
+	<bean id="formQuestionClientMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.FormQuestionClientMapper" />	  
+	</bean>
+	
+	<bean id="heightUnitsMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.HeightUnitsMapper" />	  
+	</bean>
+	
+	<bean id="personalDetailsMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.PersonalDetailsMapper" />	  
+	</bean>
+	
+	<bean id="projectMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.ProjectMapper" />	  
+	</bean>
+	
+	<bean id="questionMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.QuestionMapper" />	  
+	</bean>
+	
+	<bean id="questionGroupMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.QuestionGroupMapper" />	  
+	</bean>
+	
+	<bean id="questionAnswerMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.QuestionAnswerMapper" />	  
+	</bean>
+	
+	<bean id="reportMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.ReportMapper" />	  
+	</bean>
+	
+	<bean id="roleMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.RoleMapper" />	  
+	</bean>
+	
+	<bean id="telephoneMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.TelephoneMapper" />	  
+	</bean>
+	
+	<bean id="weightUnitsMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.WeightUnitsMapper" />	  
+	</bean>
+	
+	<bean id="calbaMapper" parent="baseMapper">
+	  <property name="mapperInterface" value="net.calba.backpain.dao.mybatis.CalbaMapper" />	  
+	</bean>
+	
+	
+	
+
+	
+</beans>
+

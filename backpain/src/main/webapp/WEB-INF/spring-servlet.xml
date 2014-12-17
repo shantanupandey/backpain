@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd">
+
+	<!-- Enabling Spring beans auto-discovery -->
+	<context:component-scan base-package="net.calba.backpain.controller" />
+	<context:component-scan base-package="net.calba.backpain.form" />
+	<context:component-scan base-package="net.calba.backpain.interceptor" />
+	
+
+	<mvc:annotation-driven />
+	  <mvc:interceptors>
+	   <ref bean="authenticationInterceptor" />
+				<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+	  </mvc:interceptors>
+
+    <!--  
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="interceptors">
+			<list>
+				<ref bean="authenticationInterceptor" />
+				<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+			</list>
+		</property>
+	</bean> -->
+	
+	<!-- Application Message Bundle -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/messages/messages" />
+		<property name="cacheSeconds" value="0" />
+	</bean>
+
+
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/pages/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+</beans>

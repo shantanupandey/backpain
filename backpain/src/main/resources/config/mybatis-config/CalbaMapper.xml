@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.calba.backpain.dao.mybatis.CalbaMapper">
+
+	<resultMap id="ClientListingResultMap" type="net.calba.backpain.model.ClientListing">
+		<id column="clinetid" property="clientId" jdbcType="INTEGER" />
+		<result column="forename" property="foreName" jdbcType="VARCHAR" />
+		<result column="surname" property="surName" jdbcType="VARCHAR" />
+		<result column="userid" property="userId" jdbcType="VARCHAR" />
+		<result column="roleid" property="roleId" jdbcType="INTEGER" />
+		<result column="createddate" property="createdDate" jdbcType="DATE" />
+		<result column="projectid" property="projectId" jdbcType="BIGINT" />
+		<result column="clienttypeid" property="clientTypeId" jdbcType="INTEGER" />
+		<result column="clientstateid" property="clientStateId"
+			jdbcType="INTEGER" />
+		<result column="city" property="city" jdbcType="VARCHAR" />
+		<result column="phone_number" property="phoneNumber" jdbcType="VARCHAR" />
+		<result column="emailaddress" property="emailAddress" jdbcType="VARCHAR" />
+		<result column="assessmentformflag" property="assessmentformflag" jdbcType="INTEGER" />
+		<result column="careComment" property="careComment" jdbcType="VARCHAR" />
+		<result column="comment1" property="comment1" jdbcType="VARCHAR" />
+		<result column="comment2" property="comment2" jdbcType="VARCHAR" />
+		<result column="comment3" property="comment3" jdbcType="VARCHAR" />
+		<result column="comment4" property="comment4" jdbcType="VARCHAR" />
+		<result column="comment5" property="comment5" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="DisabilityInfoMap" type="net.calba.backpain.model.DisabilityReportInfo">
+		<result column="date" property="date" jdbcType="VARCHAR" />
+		<result column="score" property="score" jdbcType="BIGINT" />
+	</resultMap>
+ 
+	<select id="selectClientListing" parameterType="net.calba.backpain.model.SearchCriteria"
+		resultMap="ClientListingResultMap">
+		select c.clinetid, forename, surname, dateofbirth, userid, roleid,
+		createddate,
+		projectid, clienttypeid, clientstateid, city, phone_number
+		from calba.client c
+		left join calba.address a on a.clinetid = c.clinetid
+		left join calba.telephone t on t.clinetid= c.clinetid
+		order by ${orderByClause}
+		limit ${pageSize} OFFSET ${offset}
+	</select>
+<select id="selectClientListingByUsername" parameterType="net.calba.backpain.model.SearchCriteria"
+		resultMap="ClientListingResultMap">
+		select c.clinetid, forename, surname, dateofbirth, userid, roleid,
+		createddate,
+		projectid, clienttypeid, clientstateid, city, phone_number,emailaddress
+		from calba.client c
+		left join calba.address a on a.clinetid = c.clinetid
+		left join calba.telephone t on t.clinetid= c.clinetid
+		left join calba.email f on f.clinetid= c.clinetid
+		where lower(c.userid) like lower(CONCAT(#{searchValue,jdbcType=VARCHAR}, '%')) or lower(c.forename) like lower(CONCAT(#{searchValue,jdbcType=VARCHAR}, '%')) or lower(c.surname) like lower(CONCAT(#{searchValue,jdbcType=VARCHAR}, '%')) or lower(city) like lower(CONCAT(#{searchValue,jdbcType=VARCHAR}, '%'))
+		or lower(phone_number) like lower(CONCAT(#{searchValue,jdbcType=VARCHAR}, '%')) 
+		
+
+	</select>
+	<select id="selectClientById" parameterType="java.lang.Integer"
+		resultMap="ClientListingResultMap">
+		select c.clinetid, forename, surname, dateofbirth, userid, roleid,
+		createddate,
+		projectid, clienttypeid, clientstateid, city, phone_number,comment1,comment2,comment3,comment4,comment5
+		from calba.client c
+		left join calba.address a on a.clinetid = c.clinetid
+		left join calba.telephone t on t.clinetid= c.clinetid
+		where c.clinetid = #{clientId,jdbcType=INTEGER}
+
+	</select>
+	<select id="selectClientByUserId" parameterType="java.lang.Integer"
+		resultMap="ClientListingResultMap">
+		select c.clinetid, c.forename, c.surname,
+		c.userid,s.date,s.score,s.questionid from calba.client c right join
+		calba.selfexamineanswer s on c.clinetid= #{clientId,jdbcType=INTEGER}
+		order by date desc;
+	</select>
+	<select id="selectDisabilityReportInfo" parameterType="java.lang.Integer"
+		resultMap="DisabilityInfoMap">
+		select sum(s.score) as score,s.date from calba.selfexamineanswer s where
+		s.userid= #{clientId,jdbcType=INTEGER} group by s.date order by s.date
+		desc;
+	</select>
+	<select id="selectByDate" parameterType="net.calba.backpain.model.SearchCriteria"
+		resultMap="ClientListingResultMap">
+		select * from calba.client where createddate >= #{date,jdbcType=DATE}
+
+
+	</select>
+
+	<resultMap id="QuestionScoreResultMap" type="net.calba.backpain.model.QuestionScore">
+		<id column="questionid" property="questionId" jdbcType="INTEGER" />
+		<result column="score" property="score" jdbcType="INTEGER" />
+	</resultMap>
+
+	<select id="selectClientReportScoreListing" parameterType="map"
+		resultMap="QuestionScoreResultMap">
+		select q.questionid, score,answertext,questionoptionid from
+		calba.question q
+		join calba.questiongroup qg on q.questiongroupid = qg.questiongroupid and
+		qg.report_id = #{reportId,jdbcType=INTEGER}
+		join calba.questionanswer qa on qa.questionid = q.questionid and qa.userid
+		= #{clientId,jdbcType=INTEGER}
+		join calba.formquestionclient fqc on q.questionid = fqc.questionid and
+		qa.answertext = fqc.value
+		join calba.clientform cf on cf.clientformid = fqc.clientformid and
+		clinetid = #{clientId,jdbcType=INTEGER}
+		<!-- order by q.questiongroupid, score -->
+	</select>
+
+	<select id="selectClientQuestionId" parameterType="map"
+		resultMap="QuestionScoreResultMap">
+		select answertext,questionid from calba.questionanswer where userid=
+		#{clientId,jdbcType=INTEGER}
+	</select>
+
+	<select id="selectMaxScore" parameterType="map"
+		resultMap="QuestionScoreResultMap">
+
+		select max_score from calba.question where questionid =
+		#{questionId,jdbcType=INTEGER}
+
+	</select>
+
+	<select id="updateReportScore" parameterType="map"
+		resultMap="QuestionScoreResultMap">
+
+		UPDATE calba.questionanswer SET score= #{reportQueScore,jdbcType=INTEGER}
+		where questionid= #{reportQueId,jdbcType=INTEGER} and userid =
+		#{reportUserId,jdbcType=INTEGER}
+
+	</select>
+
+
+
+	<update id="updateHistoryFactor" parameterType="net.calba.backpain.model.HistoryFactor">
+
+		UPDATE calba.history_lookup SET acute= #{acute,jdbcType=NUMERIC},early=
+		#{early,jdbcType=NUMERIC},early_mid=
+		#{early_mid,jdbcType=NUMERIC},late= #{late,jdbcType=NUMERIC},late_mid=
+		#{late_mid,jdbcType=NUMERIC},recovered=
+		#{recovered,jdbcType=NUMERIC},dd1= #{dd1,jdbcType=NUMERIC},dd2=
+		#{dd2,jdbcType=NUMERIC} where code= #{code,jdbcType=INTEGER}
+
+	</update>
+
+	<update id="updateValuesHnp" parameterType="net.calba.backpain.model.HNPLOOKUP">
+
+		UPDATE calba.hnp_lookup SET acute= #{acute,jdbcType=NUMERIC},early=
+		#{early,jdbcType=NUMERIC},early_mid=
+		#{early_mid,jdbcType=NUMERIC},late= #{late,jdbcType=NUMERIC},late_mid=
+		#{late_mid,jdbcType=NUMERIC},recovered=
+		#{recovered,jdbcType=NUMERIC},chronic=
+		#{chronic,jdbcType=NUMERIC},consultme= #{consult,jdbcType=NUMERIC}
+		where id= #{id,jdbcType=INTEGER}
+
+	</update>
+
+
+	<select id="selectHistoryFactorListing" parameterType="map"
+		resultType="hashmap">
+
+		select * from calba.history_lookup where code= #{codeId,jdbcType=INTEGER}
+
+	</select>
+
+	<select id="selectHNPValue" parameterType="map" resultType="hashmap">
+
+		select * from calba.hnp_lookup where id= #{id,jdbcType=INTEGER}
+
+	</select>
+
+
+	<select id="selectHistoryData" parameterType="map" resultType="hashmap">
+
+		select * from calba.history_lookup where pain_type=
+		#{firstColumn,jdbcType=VARCHAR} AND last_occurance=
+		#{thirdColumn,jdbcType=VARCHAR} AND first_occurance=
+		#{secondColumn,jdbcType=VARCHAR}
+
+	</select>
+
+	<select id="selectHistoryVal" parameterType="map" resultType="hashmap">
+
+		select * from calba.history_lookup where pain_type=
+		#{firstColumn,jdbcType=VARCHAR} AND first_occurance=
+		#{secondColumn,jdbcType=VARCHAR}
+
+	</select>
+
+	<select id="selectSetForms" parameterType="map" resultType="hashmap">
+
+		select * from calba.monitoringforms where
+		setid=#{setid,jdbcType=INTEGER} order by id
+
+	</select>
+
+
+	<select id="selectUser" parameterType="net.calba.backpain.model.SearchCriteria"
+		resultMap="ClientListingResultMap">
+		select * from calba.client
+
+
+	</select>
+	<select id="selectUserFormSetFlag" parameterType="net.calba.backpain.model.SearchCriteria"
+		resultMap="ClientListingResultMap">
+		select * from calba.client  where clinetid= #{clinetid,jdbcType=INTEGER}
+
+
+	</select>
+
+	<update id="updateClientSet" parameterType="net.calba.backpain.model.ClientFormSet">
+
+		UPDATE calba.client SET "setForm"= #{formSet,jdbcType=INTEGER} where userid=
+		#{userId,jdbcType=VARCHAR}
+
+	</update>
+
+	<update id="updateClientSetFlag" parameterType="net.calba.backpain.model.ClientFormSet">
+
+		UPDATE calba.client SET "formSetFlag"= #{formSetFlag,jdbcType=INTEGER} where
+		clinetid= #{clinetid,jdbcType=INTEGER}
+
+	</update>
+
+
+	<select id="selectMoniterList" parameterType="net.calba.backpain.model.SearchCriteria"
+		resultMap="ClientListingResultMap">
+		select * from calba.monitoringsystem order by userid,moniterid
+	</select>
+
+
+	<select id="selectQuestionFormMoniter" parameterType="map"
+		resultType="hashmap">
+
+
+		select * from calba.moniterformquestion where
+		questionid=#{questionID,jdbcType=INTEGER} and
+		userid=#{clientId,jdbcType=INTEGER}
+
+	</select>
+
+
+	<select id="selectFlagValue" parameterType="map" resultType="hashmap">
+
+		select * from calba.moniterformquestion where
+		setid=#{flag,jdbcType=INTEGER} and userid=#{clientId,jdbcType=INTEGER}
+		order by questionid
+
+	</select>
+
+
+	<insert id="insertToMoniterFormQuestion" parameterType="map">
+
+		<selectKey resultType="java.lang.Integer" keyProperty="moniterseqId"
+			order="BEFORE">
+			select nextval('moniterFormQuestion_seq')
+		</selectKey>
+
+		insert into calba.moniterformquestion (id, questionid, setid
+		,userid,flag)
+		values (#{moniterseqId,jdbcType=INTEGER}, #{questionid,jdbcType=INTEGER},
+		#{setid,jdbcType=INTEGER},#{userid,jdbcType=INTEGER},#{flag,jdbcType=INTEGER}
+		)
+	</insert>
+
+
+	<update id="updateMoniterFormQuestion" parameterType="map">
+
+		UPDATE calba.moniterformquestion SET flag= #{flag,jdbcType=INTEGER} where
+		questionid=#{questionid,jdbcType=INTEGER} and
+		userid=#{userid,jdbcType=INTEGER}
+
+	</update>
+
+
+	<select id="getListMoniter" parameterType="map" resultType="hashmap">
+
+		select * from calba.monitoringsystem where
+		userid=#{clientId,jdbcType=INTEGER} order by moniterid
+	</select>
+
+
+	<select id="selectEmailList" parameterType="map" resultType="hashmap">
+
+		select emailaddress from calba.email where
+		clinetid=#{clinetid,jdbcType=INTEGER}
+	</select>
+
+	<select id="selectSetId" parameterType="map" resultType="INTEGER">
+
+		select "formSetFlag" from calba.client where
+		clinetid=#{clinetid,jdbcType=INTEGER}
+
+	</select>
+
+
+	<select id="selectFormQuestions" parameterType="map" resultType="hashmap">
+		select * from calba.selfexamineform order by id
+	</select>
+
+	<select id="selectExamineData" parameterType="net.calba.backpain.model.ExamineRecord"
+		resultType="hashmap">
+
+
+		select * from calba.selfexamineanswer where
+		questionid=#{id,jdbcType=INTEGER} and
+		userid=#{userId,jdbcType=INTEGER} order by id desc
+
+	</select>
+
+
+
+	<insert id="insertToExamineAnswer" parameterType="net.calba.backpain.model.ExamineRecord">
+
+		<selectKey resultType="java.lang.Integer" keyProperty="selfExamineSeqId"
+			order="BEFORE">
+			select nextval('selfExamine_Seq')
+		</selectKey>
+
+		insert into calba.selfexamineanswer (id, questionid, score
+		,userid,date)
+		values (#{selfExamineSeqId,jdbcType=INTEGER}, #{id,jdbcType=INTEGER},
+		#{score,jdbcType=INTEGER},#{userId,jdbcType=INTEGER},#{date,jdbcType=VARCHAR}
+		)
+	</insert>
+
+	<update id="updateinsertToExamineAnswer" parameterType="net.calba.backpain.model.ExamineRecord">
+
+		UPDATE calba.selfexamineanswer SET score= #{score,jdbcType=INTEGER},date=
+		#{date,jdbcType=VARCHAR} where questionid=#{id,jdbcType=INTEGER} and
+		userid=#{userId,jdbcType=INTEGER}
+
+	</update>
+
+	<select id="selectSelfExamineData" parameterType="map"
+		resultType="hashmap">
+		select * from calba.selfexamineanswer where id between ((select max(id) from
+		calba.selfexamineanswer where userid=#{clientId,jdbcType=INTEGER})-23)
+		and (select max(id) from calba.selfexamineanswer where
+		userid=#{clientId,jdbcType=INTEGER}) order by questionid;
+	</select>
+	<update id="UpdateClientDisbilityStatus" parameterType="map">
+
+		UPDATE calba.client SET disabilityformupdate= #{score,jdbcType=INTEGER}
+		where clinetid=#{clientId,jdbcType=INTEGER}
+
+	</update>
+	<update id="UpdateClientDisbilityStatusByUID" parameterType="map">
+
+		UPDATE calba.client SET disabilityformupdate=
+		#{score,jdbcType=INTEGER} where userid=#{userId,jdbcType=VARCHAR}
+
+	</update>
+	
+	<update id="UpdateClientAssesmentStatus" parameterType="net.calba.backpain.model.ClientListing">
+
+		UPDATE calba.client SET assessmentformflag=1,comment1=#{comment1,jdbcType=VARCHAR},comment2=#{comment2,jdbcType=VARCHAR},comment3=#{comment3,jdbcType=VARCHAR},comment4=#{comment4,jdbcType=VARCHAR},comment5=#{comment5,jdbcType=VARCHAR} where userid=#{userId,jdbcType=VARCHAR}
+
+	</update>
+	
+	
+	<select id="selectClientDisbilityStatus" parameterType="map">
+
+		select * from calba.client where clinetid=#{clientId,jdbcType=INTEGER}
+
+	</select>
+	
+	
+	 
+</mapper>
